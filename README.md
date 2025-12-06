@@ -1,4 +1,4 @@
-# pin-guessing-game
+# lockpick
 Multiplayer number guessing game
 
 ## Overview
