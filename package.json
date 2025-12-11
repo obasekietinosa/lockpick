@@ -1,0 +1,16 @@
+{
+  "name": "lockpick",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:client": "npm run dev --workspace client",
+    "dev:server": "npm run dev --workspace server",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "preview": "npm run preview --workspace client"
+  }
+}
