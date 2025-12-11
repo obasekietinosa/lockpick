@@ -101,8 +101,17 @@ When all rounds have been concluded, there will be a game end state similar to t
 The entire project will be built on a monorepo with the frontend and backend together. The entire project will use TypeScript end to end. The frontend will be in React + Vite and the backend with be in ExpressJS with Socket.io
 
 ### Frontend
+#### Components
+Use composition for component architecture where possible
+
+#### Routing
+Use React Router 7 for routing.
+
+#### Styling
+Styling will use Tailwind v4. Keep styles contained in components to promote reuse where possible.
 
 ### Backend
+Modular architecture, keep concerns seperate and small.
 
 ## Attribution
 ### Icons
