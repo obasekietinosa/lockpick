@@ -5,9 +5,11 @@ interface SummaryPreviewProps {
   pinLength: number;
   hintsEnabled: boolean;
   timerLabel?: string;
+  onStartGame: () => void;
+  onJoinGame: () => void;
 }
 
-export function SummaryPreview({ playerName, pinLength, hintsEnabled, timerLabel }: SummaryPreviewProps) {
+export function SummaryPreview({ playerName, pinLength, hintsEnabled, timerLabel, onStartGame, onJoinGame }: SummaryPreviewProps) {
   return (
     <div className="summary-card" aria-label="Configuration summary">
       <div className="summary-head">
@@ -55,6 +57,15 @@ export function SummaryPreview({ playerName, pinLength, hintsEnabled, timerLabel
           {hintsEnabled && <span className="dot misplaced" />}
           {hintsEnabled && <span>Orange = right digit, wrong spot</span>}
         </div>
+      </div>
+
+      <div className="cta-row">
+        <button className="primary" type="button" onClick={onStartGame}>
+          Create lobby
+        </button>
+        <button className="ghost" type="button" onClick={onJoinGame}>
+          I already have a code
+        </button>
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 // Shared configuration data for the landing and configuration flows.
 
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 export type TimerValue = 'none' | '30s' | '1m' | '3m';
 
 export const rules = [

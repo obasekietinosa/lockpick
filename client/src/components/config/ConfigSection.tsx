@@ -12,10 +12,12 @@ type ConfigSectionProps = {
   onPinLengthChange: (value: number) => void;
   onHintsChange: (enabled: boolean) => void;
   onTimerChange: (value: TimerValue) => void;
+  onStartGame: () => void;
+  onJoinGame: () => void;
 };
 
 export function ConfigSection(props: ConfigSectionProps) {
-  const { playerName, pinLength, hintsEnabled, timer } = props;
+  const { playerName, pinLength, hintsEnabled, timer, onStartGame, onJoinGame } = props;
   const timerCopy = timerOptions.find((option) => option.value === timer);
 
   return (
@@ -38,6 +40,8 @@ export function ConfigSection(props: ConfigSectionProps) {
           pinLength={pinLength}
           hintsEnabled={hintsEnabled}
           timerLabel={timerCopy?.label}
+          onStartGame={onStartGame}
+          onJoinGame={onJoinGame}
         />
       </div>
     </section>
