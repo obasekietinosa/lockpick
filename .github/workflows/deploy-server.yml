@@ -37,3 +37,5 @@ jobs:
           private-ssh-key: ${{ secrets.SSH_KEY }}
           source-path: ./server/
           destination-path: ./server/
+          # Explicitly include node_modules so runtime dependencies are available on the target
+          rsync-options: --archive --verbose --compress --human-readable --progress --delete-after --exclude=.git* --exclude=.git/ --exclude=README.md --exclude=readme.md --exclude=.gitignore --include=node_modules/**
