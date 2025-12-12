@@ -1,6 +1,11 @@
 import '../App.css';
 
-export function CTASection() {
+interface CTASectionProps {
+  onStartSolo: () => void;
+  onInvite: () => void;
+}
+
+export function CTASection({ onStartSolo, onInvite }: CTASectionProps) {
   return (
     <section className="cta" aria-label="Call to action">
       <div>
@@ -11,8 +16,12 @@ export function CTASection() {
         </p>
       </div>
       <div className="cta-actions">
-        <button className="primary">Launch solo mode</button>
-        <button className="secondary">Invite a friend</button>
+        <button className="primary" onClick={onStartSolo}>
+          Set up my game
+        </button>
+        <button className="secondary" onClick={onInvite}>
+          Join or share a lobby
+        </button>
       </div>
     </section>
   );

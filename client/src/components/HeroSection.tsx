@@ -2,9 +2,10 @@ import '../App.css';
 
 interface HeroSectionProps {
   onShowRules: () => void;
+  onStartConfig: () => void;
 }
 
-export function HeroSection({ onShowRules }: HeroSectionProps) {
+export function HeroSection({ onShowRules, onStartConfig }: HeroSectionProps) {
   return (
     <section className="hero">
       <div className="hero-copy">
@@ -21,7 +22,9 @@ export function HeroSection({ onShowRules }: HeroSectionProps) {
           <button className="primary" onClick={onShowRules}>
             View the rules
           </button>
-          <button className="secondary">Start a match</button>
+          <button className="secondary" onClick={onStartConfig}>
+            Configure a match
+          </button>
         </div>
         <div className="pill-row" aria-label="Highlights">
           <div className="pill">🎯 Precision feedback</div>
@@ -57,7 +60,9 @@ export function HeroSection({ onShowRules }: HeroSectionProps) {
         <div className="hint">
           <span className="dot misplaced" /> Orange = right digit, wrong spot
         </div>
-        <button className="primary full">Start game</button>
+        <button className="primary full" onClick={onStartConfig}>
+          Start game setup
+        </button>
       </div>
     </section>
   );

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import '../App.css';
 
 interface TopbarProps {
@@ -7,15 +8,17 @@ interface TopbarProps {
 export function Topbar({ onShowRules }: TopbarProps) {
   return (
     <header className="topbar">
-      <div className="logo">
+      <Link to="/" className="logo" aria-label="Lockpick home">
         <span className="logo-lock">🔓</span>
         <span className="logo-word">Lockpick</span>
-      </div>
+      </Link>
       <nav className="top-actions" aria-label="Primary">
         <button className="ghost" onClick={onShowRules}>
           Game rules
         </button>
-        <button className="primary">Play now</button>
+        <Link to="/config" className="primary">
+          Play now
+        </Link>
       </nav>
     </header>
   );
