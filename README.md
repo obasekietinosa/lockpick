@@ -100,6 +100,10 @@ When all rounds have been concluded, there will be a game end state similar to t
 ## Technology Stack
 The entire project will be built on a monorepo with the frontend and backend together. The entire project will use TypeScript end to end. The frontend will be in React + Vite and the backend with be in ExpressJS with Socket.io
 
+## Environment configuration
+- **Frontend**: set `VITE_API_BASE_URL` in `client/.env` to the deployed API origin (defaults to `http://localhost:3001` for local development).
+- **Backend**: configure `PORT` to choose the server port (defaults to `3001`).
+
 ### Frontend
 #### Components
 Use composition for component architecture where possible

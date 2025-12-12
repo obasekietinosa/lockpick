@@ -5,11 +5,24 @@ interface SummaryPreviewProps {
   pinLength: number;
   hintsEnabled: boolean;
   timerLabel?: string;
+  statusMessage: string | null;
+  statusTone: 'success' | 'error' | 'info';
+  isCreatingLobby: boolean;
   onStartGame: () => void;
   onJoinGame: () => void;
 }
 
-export function SummaryPreview({ playerName, pinLength, hintsEnabled, timerLabel, onStartGame, onJoinGame }: SummaryPreviewProps) {
+export function SummaryPreview({
+  playerName,
+  pinLength,
+  hintsEnabled,
+  timerLabel,
+  statusMessage,
+  statusTone,
+  isCreatingLobby,
+  onStartGame,
+  onJoinGame,
+}: SummaryPreviewProps) {
   return (
     <div className="summary-card" aria-label="Configuration summary">
       <div className="summary-head">
@@ -60,13 +73,24 @@ export function SummaryPreview({ playerName, pinLength, hintsEnabled, timerLabel
       </div>
 
       <div className="cta-row">
-        <button className="primary" type="button" onClick={onStartGame}>
-          Create lobby
+        <button
+          className="primary"
+          type="button"
+          onClick={onStartGame}
+          disabled={!playerName.trim() || isCreatingLobby}
+        >
+          {isCreatingLobby ? 'Creating lobby…' : 'Create lobby'}
         </button>
         <button className="ghost" type="button" onClick={onJoinGame}>
           I already have a code
         </button>
       </div>
+
+      {statusMessage && (
+        <div className={`status-banner ${statusTone}`} role="status">
+          {statusMessage}
+        </div>
+      )}
     </div>
   );
 }
