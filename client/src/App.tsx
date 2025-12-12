@@ -45,12 +45,28 @@ const highlights = [
   },
 ];
 
+const timerOptions = [
+  { value: 'none', label: 'No timer', detail: 'Play at your own pace without a countdown.' },
+  { value: '30s', label: '30 seconds', detail: 'Default sprint that keeps the tension high.' },
+  { value: '1m', label: '1 minute', detail: 'Balanced window to think and adapt.' },
+  { value: '3m', label: '3 minutes', detail: 'Deep-dive rounds for methodical codebreakers.' },
+];
+
 function App() {
   const [showRules, setShowRules] = useState(false);
+  const [playerName, setPlayerName] = useState('Player 1');
+  const [pinLength, setPinLength] = useState(5);
+  const [timer, setTimer] = useState<'none' | '30s' | '1m' | '3m'>('30s');
+  const [hintsEnabled, setHintsEnabled] = useState(true);
 
   const ruleItems = useMemo(
     () => rules.map((line, index) => `${index + 1}. ${line}`),
     [],
+  );
+
+  const timerCopy = useMemo(
+    () => timerOptions.find((option) => option.value === timer),
+    [timer],
   );
 
   return (
@@ -123,6 +139,172 @@ function App() {
               <span className="dot misplaced" /> Orange = right digit, wrong spot
             </div>
             <button className="primary full">Start game</button>
+          </div>
+        </section>
+
+        <section className="config" aria-label="Rule configuration">
+          <div className="section-head">
+            <div>
+              <p className="eyebrow">Dial in your rules</p>
+              <h2>Configure a match before you play</h2>
+            </div>
+            <p className="section-lede">
+              Choose how many digits to guess, whether to show hint colors, and how long each round should run. Your selections
+              update the summary so you can share or save them.
+            </p>
+          </div>
+
+          <div className="config-grid">
+            <div className="config-card">
+              <div className="field">
+                <label htmlFor="player-name">Player name</label>
+                <input
+                  id="player-name"
+                  name="playerName"
+                  value={playerName}
+                  onChange={(event) => setPlayerName(event.target.value)}
+                  placeholder="Ada the Analyst"
+                  autoComplete="name"
+                />
+                <p className="field-help">We will use this in lobbies, invites, and scoreboards.</p>
+              </div>
+
+              <div className="field">
+                <div className="field-head">
+                  <div>
+                    <p className="eyebrow">Pin length</p>
+                    <h3>Choose digits per round</h3>
+                  </div>
+                  <span className="badge muted">Required</span>
+                </div>
+                <div className="chip-row">
+                  {[5, 7, 10].map((length) => (
+                    <button
+                      key={length}
+                      type="button"
+                      className={`chip ${pinLength === length ? 'active' : ''}`}
+                      aria-pressed={pinLength === length}
+                      onClick={() => setPinLength(length)}
+                    >
+                      {length} digits
+                    </button>
+                  ))}
+                </div>
+                <p className="field-help">Both players use the same pin length for all three rounds.</p>
+              </div>
+
+              <div className="field">
+                <div className="field-head">
+                  <div>
+                    <p className="eyebrow">Hint mode</p>
+                    <h3>Decide how much feedback you want</h3>
+                  </div>
+                  <span className="badge">Popular</span>
+                </div>
+                <div className="toggle-row" role="group" aria-label="Hint mode">
+                  <button
+                    type="button"
+                    className={`toggle ${hintsEnabled ? 'active' : ''}`}
+                    aria-pressed={hintsEnabled}
+                    onClick={() => setHintsEnabled(true)}
+                  >
+                    Hints on
+                  </button>
+                  <button
+                    type="button"
+                    className={`toggle ${!hintsEnabled ? 'active' : ''}`}
+                    aria-pressed={!hintsEnabled}
+                    onClick={() => setHintsEnabled(false)}
+                  >
+                    Hints off
+                  </button>
+                </div>
+                <p className="field-help">
+                  Hints add orange markers for correct digits in the wrong slot; turning them off shows only exact matches.
+                </p>
+              </div>
+
+              <div className="field">
+                <div className="field-head">
+                  <div>
+                    <p className="eyebrow">Timer per round</p>
+                    <h3>Pick your pacing</h3>
+                  </div>
+                  <span className="chip ghost-chip">3 rounds total</span>
+                </div>
+                <div className="option-grid" role="radiogroup" aria-label="Timer per round">
+                  {timerOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`option-card ${timer === option.value ? 'active' : ''}`}
+                      onClick={() => setTimer(option.value as typeof timer)}
+                      aria-pressed={timer === option.value}
+                    >
+                      <div className="option-top">
+                        <span className="chip muted">{option.label}</span>
+                        {timer === option.value && <span className="status-dot" aria-hidden />}
+                      </div>
+                      <p className="option-detail">{option.detail}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="cta-row">
+                <button className="primary">Start new game</button>
+                <button className="secondary">Join existing game</button>
+              </div>
+            </div>
+
+            <div className="summary-card" aria-label="Configuration summary">
+              <div className="summary-head">
+                <div>
+                  <p className="eyebrow">Live preview</p>
+                  <h3>Your rules at a glance</h3>
+                </div>
+                <span className="badge muted">Shareable</span>
+              </div>
+              <ul className="summary-list">
+                <li>
+                  <span className="summary-label">Player</span>
+                  <span className="summary-value">{playerName || 'Player 1'}</span>
+                </li>
+                <li>
+                  <span className="summary-label">Pin length</span>
+                  <span className="summary-value">{pinLength} digits</span>
+                </li>
+                <li>
+                  <span className="summary-label">Hints</span>
+                  <span className="summary-value">{hintsEnabled ? 'Enabled' : 'Disabled'}</span>
+                </li>
+                <li>
+                  <span className="summary-label">Timer</span>
+                  <span className="summary-value">{timerCopy?.label}</span>
+                </li>
+              </ul>
+
+              <div className="preview-card" role="presentation">
+                <div className="preview-row">
+                  <span className="chip">Round 1 of 3</span>
+                  <span className="chip muted">{timerCopy?.label}</span>
+                </div>
+                <p className="preview-name">{playerName || 'Player 1'}</p>
+                <div className="preview-pin" aria-hidden>
+                  {Array.from({ length: pinLength }).map((_, index) => (
+                    <span key={index} className="pin-slot">
+                      ?
+                    </span>
+                  ))}
+                </div>
+                <div className="preview-hints">
+                  <span className={`dot ${hintsEnabled ? 'correct' : 'muted-dot'}`} />
+                  <span>Green = correct spot</span>
+                  {hintsEnabled && <span className="dot misplaced" />}
+                  {hintsEnabled && <span>Orange = right digit, wrong spot</span>}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
