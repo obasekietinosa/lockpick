@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css';
 import { CTASection } from './components/CTASection';
@@ -11,6 +11,8 @@ import { Topbar } from './components/Topbar';
 import { ConfigSection } from './components/config/ConfigSection';
 import { JoinForm } from './components/join/JoinForm';
 import { API_BASE_URL, TimerValue, rules } from './constants';
+import { RoundPreview } from './components/play/RoundPreview';
+import { PinSelection } from './components/pins/PinSelection';
 
 type LobbyResponse = {
   lobby: {
@@ -24,6 +26,33 @@ type LobbyResponse = {
   };
 };
 
+function buildFeedback(guess: string, secret: string, hintsEnabled: boolean): string {
+  const feedback = Array.from({ length: guess.length }, () => '⬜️');
+  const secretDigits = secret.split('');
+  const guessDigits = guess.split('');
+  const remaining: Record<string, number> = {};
+
+  guessDigits.forEach((digit, index) => {
+    if (digit === secretDigits[index]) {
+      feedback[index] = '🟩';
+    } else {
+      remaining[secretDigits[index]] = (remaining[secretDigits[index]] || 0) + 1;
+    }
+  });
+
+  if (hintsEnabled) {
+    guessDigits.forEach((digit, index) => {
+      if (feedback[index] === '🟩') return;
+      if (remaining[digit]) {
+        feedback[index] = '🟧';
+        remaining[digit] -= 1;
+      }
+    });
+  }
+
+  return feedback.join(' ');
+}
+
 function AppRoutes() {
   const [showRules, setShowRules] = useState(false);
   const [playerName, setPlayerName] = useState('Player 1');
@@ -33,6 +62,19 @@ function AppRoutes() {
   const [inviteCode, setInviteCode] = useState('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<'success' | 'error' | 'info'>('info');
+  const [pins, setPins] = useState<string[]>(() => Array(3).fill(''));
+  const [activeRound, setActiveRound] = useState(1);
+  const [guessDigits, setGuessDigits] = useState<string[]>(() => Array(pinLength).fill(''));
+  const [guessHistory, setGuessHistory] = useState<{ round: number; guess: string; feedback: string }[]>([]);
+  const [playStatus, setPlayStatus] = useState<string | null>(null);
+  const [playTone, setPlayTone] = useState<'success' | 'error' | 'info'>('info');
+
+  useEffect(() => {
+    setPins(Array(3).fill(''));
+    setGuessDigits(Array(pinLength).fill(''));
+    setGuessHistory([]);
+    setActiveRound(1);
+  }, [pinLength]);
 
   const ruleItems = useMemo(() => rules.map((line, index) => `${index + 1}. ${line}`), []);
   const navigate = useNavigate();
@@ -55,7 +97,7 @@ function AppRoutes() {
       setInviteCode(data.lobby.id);
       setStatusTone('success');
       setStatusMessage(`Lobby ready. Share this code to invite a friend: ${data.lobby.id}`);
-      navigate('/join');
+      navigate('/select-pin');
     } catch (error) {
       setStatusTone('error');
       setStatusMessage(error instanceof Error ? error.message : 'Could not start a game.');
@@ -82,6 +124,61 @@ function AppRoutes() {
       setStatusTone('error');
       setStatusMessage(error instanceof Error ? error.message : 'Could not join that lobby.');
     }
+  };
+
+  const handlePinChange = (roundIndex: number, value: string) => {
+    const cleaned = value.replace(/\D/g, '').slice(0, pinLength);
+    setPins((prev) => prev.map((pin, index) => (index === roundIndex ? cleaned : pin)));
+  };
+
+  const generatePin = () =>
+    Array.from({ length: pinLength }, () => Math.floor(Math.random() * 10)).join('');
+
+  const handleAutoGenerate = () => {
+    setPins(Array.from({ length: 3 }, generatePin));
+  };
+
+  const handleGuessDigitChange = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, '').slice(0, 1);
+    setGuessDigits((prev) => prev.map((existing, idx) => (idx === index ? digit : existing)));
+  };
+
+  const currentSecret = pins[activeRound - 1];
+
+  const handleSubmitGuess = () => {
+    const guess = guessDigits.join('');
+
+    if (guess.length !== pinLength) {
+      setPlayTone('error');
+      setPlayStatus('Enter a digit for each slot before submitting.');
+      return;
+    }
+
+    if (!currentSecret || currentSecret.length !== pinLength) {
+      setPlayTone('error');
+      setPlayStatus('Set your secret pin for this round to compare guesses.');
+      return;
+    }
+
+    const feedback = buildFeedback(guess, currentSecret, hintsEnabled);
+    setGuessHistory((prev) => [...prev, { round: activeRound, guess, feedback }]);
+    setGuessDigits(Array(pinLength).fill(''));
+
+    if (guess === currentSecret) {
+      const nextRound = Math.min(3, activeRound + 1);
+      setActiveRound(nextRound);
+      setPlayTone('success');
+      setPlayStatus(nextRound > activeRound ? 'Nice crack! Advance to the next round.' : 'You solved every round.');
+    } else {
+      setPlayTone('info');
+      setPlayStatus('Keep iterating—use the hints to adjust your next guess.');
+    }
+  };
+
+  const handleAdvanceRound = () => {
+    setActiveRound((prev) => (prev >= 3 ? 3 : prev + 1));
+    setGuessDigits(Array(pinLength).fill(''));
+    setPlayStatus(null);
   };
 
   return (
@@ -147,6 +244,54 @@ function AppRoutes() {
                   onPlayerNameChange={setPlayerName}
                   onInviteCodeChange={setInviteCode}
                   onJoin={handleJoinLobby}
+                />
+              </div>
+            }
+          />
+          <Route
+            path="/select-pin"
+            element={
+              <div className="section-stack">
+                <div className="page-head">
+                  <p className="eyebrow">Plan your rounds</p>
+                  <h1>Lock in secret pins</h1>
+                  <p className="section-lede">Pick the numbers your rival will be trying to guess across all three rounds.</p>
+                </div>
+                <PinSelection
+                  playerName={playerName}
+                  pinLength={pinLength}
+                  pins={pins}
+                  inviteCode={inviteCode}
+                  onPinChange={handlePinChange}
+                  onAutoGenerate={handleAutoGenerate}
+                  onContinue={() => navigate('/play')}
+                />
+              </div>
+            }
+          />
+          <Route
+            path="/play"
+            element={
+              <div className="section-stack">
+                <div className="page-head">
+                  <p className="eyebrow">Gameplay</p>
+                  <h1>Crack the code before the timer ends</h1>
+                  <p className="section-lede">
+                    Practice the core guessing experience: enter digits, submit, and read the hints to speed-run the round.
+                  </p>
+                </div>
+                <RoundPreview
+                  playerName={playerName}
+                  pins={pins}
+                  pinLength={pinLength}
+                  activeRound={activeRound}
+                  guessDigits={guessDigits}
+                  guessHistory={guessHistory}
+                  statusMessage={playStatus}
+                  statusTone={playTone}
+                  onDigitChange={handleGuessDigitChange}
+                  onSubmitGuess={handleSubmitGuess}
+                  onAdvanceRound={handleAdvanceRound}
                 />
               </div>
             }

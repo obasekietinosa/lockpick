@@ -626,6 +626,143 @@ input:focus {
   box-shadow: none;
 }
 
+.pin-selection-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.pin-row {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pin-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pin-preview-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.pin-preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pin-preview-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.pin-preview-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+}
+
+.play-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.play-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-card,
+.timer-card,
+.history-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.timer-card button {
+  align-self: start;
+}
+
+.hint-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.guess-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 0.6rem;
+  margin: 0.6rem 0 0.25rem;
+}
+
+.pin-slot.interactive {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f8fafc;
+  font-size: 1.2rem;
+  transition: transform 100ms ease, border-color 100ms ease, box-shadow 100ms ease;
+}
+
+.pin-slot.interactive:focus {
+  border-color: rgba(34, 211, 238, 0.6);
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12);
+  transform: translateY(-1px);
+}
+
+.history-card .guess-history {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+}
+
+.history-feedback {
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.muted {
+  color: #94a3b8;
+}
+
 .section-head {
   display: flex;
   flex-direction: column;
@@ -770,6 +907,10 @@ input:focus {
 
   .hero-card {
     order: -1;
+  }
+
+  .play-grid {
+    grid-template-columns: 1fr;
   }
 
   .config-grid {
