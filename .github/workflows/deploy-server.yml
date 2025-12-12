@@ -21,8 +21,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd server
           npm ci
+          # npm workspaces hoist dependencies to the repo root, so copy them into the server
+          # directory to ensure runtime modules are deployed alongside the build output.
+          rsync -a node_modules/ server/node_modules/
 
       - name: Build server
         run: |
