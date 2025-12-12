@@ -1,4 +1,4 @@
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
@@ -7,7 +7,35 @@ import { LobbySettings, TimerValue, lobbyStore } from './lobbyStore';
 const app = express();
 const port = Number(process.env.PORT) || 3001;
 
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser requests or when no Origin header is sent (e.g. health checks)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const defaultAllowedOrigins = [
+      'https://lockpick.co',
+      'https://www.lockpick.co',
+      'http://localhost:5173',
+      'http://localhost:4173',
+    ];
+
+    const whitelist = allowedOrigins.length > 0 ? allowedOrigins : defaultAllowedOrigins;
+
+    callback(null, whitelist.includes(origin));
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 app.get('/health', (_req, res) => {
