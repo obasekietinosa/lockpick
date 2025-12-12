@@ -8,6 +8,9 @@ type ConfigSectionProps = {
   pinLength: number;
   hintsEnabled: boolean;
   timer: TimerValue;
+  statusMessage: string | null;
+  statusTone: 'success' | 'error' | 'info';
+  isCreatingLobby: boolean;
   onPlayerNameChange: (value: string) => void;
   onPinLengthChange: (value: number) => void;
   onHintsChange: (enabled: boolean) => void;
@@ -34,12 +37,24 @@ export function ConfigSection(props: ConfigSectionProps) {
       </div>
 
       <div className="config-grid">
-        <ConfigForm {...props} />
+        <ConfigForm
+          playerName={playerName}
+          pinLength={pinLength}
+          hintsEnabled={hintsEnabled}
+          timer={timer}
+          onPlayerNameChange={props.onPlayerNameChange}
+          onPinLengthChange={props.onPinLengthChange}
+          onHintsChange={props.onHintsChange}
+          onTimerChange={props.onTimerChange}
+        />
         <SummaryPreview
           playerName={playerName}
           pinLength={pinLength}
           hintsEnabled={hintsEnabled}
           timerLabel={timerCopy?.label}
+          statusMessage={props.statusMessage}
+          statusTone={props.statusTone}
+          isCreatingLobby={props.isCreatingLobby}
           onStartGame={onStartGame}
           onJoinGame={onJoinGame}
         />

@@ -62,6 +62,7 @@ function AppRoutes() {
   const [inviteCode, setInviteCode] = useState('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<'success' | 'error' | 'info'>('info');
+  const [isCreatingLobby, setIsCreatingLobby] = useState(false);
   const [pins, setPins] = useState<string[]>(() => Array(3).fill(''));
   const [activeRound, setActiveRound] = useState(1);
   const [guessDigits, setGuessDigits] = useState<string[]>(() => Array(pinLength).fill(''));
@@ -80,12 +81,20 @@ function AppRoutes() {
   const navigate = useNavigate();
 
   const handleCreateLobby = async () => {
+    const trimmedName = playerName.trim();
+    if (!trimmedName) {
+      setStatusTone('error');
+      setStatusMessage('Add your name so we can personalise the lobby.');
+      return;
+    }
+
     setStatusMessage(null);
+    setIsCreatingLobby(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/lobbies`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName, pinLength, hintsEnabled, timer }),
+        body: JSON.stringify({ playerName: trimmedName, pinLength, hintsEnabled, timer }),
       });
 
       if (!response.ok) {
@@ -101,6 +110,8 @@ function AppRoutes() {
     } catch (error) {
       setStatusTone('error');
       setStatusMessage(error instanceof Error ? error.message : 'Could not start a game.');
+    } finally {
+      setIsCreatingLobby(false);
     }
   };
 
@@ -217,6 +228,9 @@ function AppRoutes() {
                   pinLength={pinLength}
                   hintsEnabled={hintsEnabled}
                   timer={timer}
+                  statusMessage={statusMessage}
+                  statusTone={statusTone}
+                  isCreatingLobby={isCreatingLobby}
                   onPlayerNameChange={setPlayerName}
                   onPinLengthChange={setPinLength}
                   onHintsChange={setHintsEnabled}

@@ -10,8 +10,6 @@ type ConfigFormProps = {
   onPinLengthChange: (value: number) => void;
   onHintsChange: (enabled: boolean) => void;
   onTimerChange: (value: TimerValue) => void;
-  onStartGame: () => void;
-  onJoinGame: () => void;
 };
 
 export function ConfigForm({
@@ -23,8 +21,6 @@ export function ConfigForm({
   onPinLengthChange,
   onHintsChange,
   onTimerChange,
-  onStartGame,
-  onJoinGame,
 }: ConfigFormProps) {
   return (
     <div className="config-card">
@@ -121,15 +117,6 @@ export function ConfigForm({
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="cta-row">
-        <button className="primary" type="button" onClick={onStartGame}>
-          Start new game
-        </button>
-        <button className="secondary" type="button" onClick={onJoinGame}>
-          Join existing game
-        </button>
       </div>
     </div>
   );
