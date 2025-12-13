@@ -1,0 +1,6 @@
+# Redirect all requests to the SPA entry point
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
