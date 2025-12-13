@@ -19,17 +19,13 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Install dependencies
-        run: |
-          npm ci
-          # npm workspaces hoist dependencies to the repo root, so copy them into the server
-          # directory to ensure runtime modules are deployed alongside the build output.
-          rsync -a node_modules/ server/node_modules/
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci --workspaces=false
 
       - name: Build server
-        run: |
-          cd server
-          npm run build
+        working-directory: server
+        run: npm run build
 
       - name: Deploy via SFTP
         uses: SamKirkland/web-deploy@v1
@@ -39,5 +35,3 @@ jobs:
           private-ssh-key: ${{ secrets.SSH_KEY }}
           source-path: ./server/
           destination-path: ./server/
-          # Explicitly include node_modules so runtime dependencies are available on the target
-          rsync-options: --archive --verbose --compress --human-readable --progress --delete-after --exclude=.git* --exclude=.git/ --exclude=README.md --exclude=readme.md --exclude=.gitignore --include=node_modules/**
