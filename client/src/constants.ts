@@ -1,5 +1,3 @@
-// Shared configuration data for the landing and configuration flows.
-
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 export type TimerValue = 'none' | '30s' | '1m' | '3m';
@@ -11,25 +9,20 @@ export const rules = [
   'Rounds last up to 3 minutes; win the most rounds to win the match.',
 ];
 
-export const modes = [
-  {
-    title: 'Solo practice',
-    description: 'Beat the clock with adaptive difficulty to sharpen your pattern spotting.',
-    badge: 'Fast start',
-  },
-  {
-    title: 'Challenge a friend',
-    description: 'Create a room and send a link to duel someone you know.',
-    badge: 'Head-to-head',
-  },
-  {
-    title: 'Find a rival',
-    description: 'Queue up and match with another codebreaker who picked similar rules.',
-    badge: 'Realtime',
-  },
+export const pinLengthOptions = [
+  { value: 5, label: '5 digits', detail: 'Baseline length for fast-paced rounds.' },
+  { value: 7, label: '7 digits', detail: 'More room for patterns and bait.' },
+  { value: 10, label: '10 digits', detail: 'Endurance mode for master codebreakers.' },
 ];
 
-export const highlights = [
+export const timerOptions: { value: TimerValue; label: string; detail: string }[] = [
+  { value: 'none', label: 'No timer', detail: 'Play at your own pace without a countdown.' },
+  { value: '30s', label: '30 seconds', detail: 'Default sprint that keeps the tension high.' },
+  { value: '1m', label: '1 minute', detail: 'Balanced window to think and adapt.' },
+  { value: '3m', label: '3 minutes', detail: 'Deep-dive rounds for methodical codebreakers.' },
+];
+
+export const highlightCards = [
   {
     title: 'Realtime multiplayer',
     detail: 'Sockets keep turns perfectly in sync with low-latency updates.',
@@ -39,7 +32,7 @@ export const highlights = [
     detail: 'Whimsical gradients, animated locks, and celebratory confetti keep wins memorable.',
   },
   {
-    title: 'Accessible on mobile',
+    title: 'Mobile-first',
     detail: 'Thumb-friendly buttons, large inputs, and layouts that flex down to small screens.',
   },
   {
@@ -48,9 +41,21 @@ export const highlights = [
   },
 ];
 
-export const timerOptions: { value: TimerValue; label: string; detail: string }[] = [
-  { value: 'none', label: 'No timer', detail: 'Play at your own pace without a countdown.' },
-  { value: '30s', label: '30 seconds', detail: 'Default sprint that keeps the tension high.' },
-  { value: '1m', label: '1 minute', detail: 'Balanced window to think and adapt.' },
-  { value: '3m', label: '3 minutes', detail: 'Deep-dive rounds for methodical codebreakers.' },
+export const journeySteps = [
+  {
+    title: 'Set your rules',
+    description: 'Choose pin length, hint mode, and timers before creating a lobby or joining one.',
+  },
+  {
+    title: 'Lock in your pins',
+    description: 'Pick three secret combinations up front so each round is ready to roll.',
+  },
+  {
+    title: 'Trade guesses',
+    description: 'Input digits quickly; hint indicators show whether a digit is correct or misplaced.',
+  },
+  {
+    title: 'Claim the match',
+    description: 'Win the most rounds to secure the victory. A draw is possible when timers expire.',
+  },
 ];
