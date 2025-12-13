@@ -9,6 +9,7 @@ interface GuessEntry {
 interface RoundPreviewProps {
   playerName: string;
   pins: string[];
+  rivalPins: string[];
   pinLength: number;
   activeRound: number;
   guessDigits: string[];
@@ -23,6 +24,7 @@ interface RoundPreviewProps {
 export function RoundPreview({
   playerName,
   pins,
+  rivalPins,
   pinLength,
   activeRound,
   guessDigits,
@@ -34,6 +36,7 @@ export function RoundPreview({
   onAdvanceRound,
 }: RoundPreviewProps) {
   const maskedPins = pins.map((pin) => (pin ? '•'.repeat(pin.length) : 'Not set'));
+  const rivalMaskedPins = rivalPins.map((pin) => (pin ? '•'.repeat(pin.length) : 'Waiting for rival'));
 
   return (
     <section className="config" aria-label="Gameplay preview">
@@ -133,6 +136,19 @@ export function RoundPreview({
               </li>
             ))}
           </ul>
+
+          <div className="status-card">
+            <p className="label">Pins you are cracking</p>
+            <ul className="pin-preview-list">
+              {rivalMaskedPins.map((value, index) => (
+                <li key={`rival-${index}`}>
+                  <span className="summary-label">Round {index + 1}</span>
+                  <span className="summary-value">{value}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="field-help">These are locked in by your rival—your guesses target these hidden codes.</p>
+          </div>
 
           <div className="status-card">
             <p className="label">Opponent last guess</p>

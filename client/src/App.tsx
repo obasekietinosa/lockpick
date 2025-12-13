@@ -64,6 +64,7 @@ function AppRoutes() {
   const [statusTone, setStatusTone] = useState<'success' | 'error' | 'info'>('info');
   const [isCreatingLobby, setIsCreatingLobby] = useState(false);
   const [pins, setPins] = useState<string[]>(() => Array(3).fill(''));
+  const [rivalPins, setRivalPins] = useState<string[]>(() => Array(3).fill(''));
   const [activeRound, setActiveRound] = useState(1);
   const [guessDigits, setGuessDigits] = useState<string[]>(() => Array(pinLength).fill(''));
   const [guessHistory, setGuessHistory] = useState<{ round: number; guess: string; feedback: string }[]>([]);
@@ -72,6 +73,7 @@ function AppRoutes() {
 
   useEffect(() => {
     setPins(Array(3).fill(''));
+    setRivalPins(Array.from({ length: 3 }, () => generatePin(pinLength)));
     setGuessDigits(Array(pinLength).fill(''));
     setGuessHistory([]);
     setActiveRound(1);
@@ -103,7 +105,12 @@ function AppRoutes() {
       }
 
       const data = (await response.json()) as LobbyResponse;
+      const lobbyPinLength = data.lobby.settings.pinLength;
       setInviteCode(data.lobby.id);
+      setPinLength(lobbyPinLength);
+      setHintsEnabled(Boolean(data.lobby.settings.hintsEnabled));
+      setTimer(data.lobby.settings.timer);
+      setRivalPins((prev) => prev.map((pin) => pin || generatePin(lobbyPinLength)));
       setStatusTone('success');
       setStatusMessage(`Lobby ready. Share this code to invite a friend: ${data.lobby.id}`);
       navigate('/select-pin');
@@ -129,8 +136,16 @@ function AppRoutes() {
         throw new Error(payload?.message || 'Could not join that lobby.');
       }
 
+      const data = (await response.json()) as LobbyResponse;
+      const lobbyPinLength = data.lobby.settings.pinLength;
+      setPinLength(lobbyPinLength);
+      setHintsEnabled(Boolean(data.lobby.settings.hintsEnabled));
+      setTimer(data.lobby.settings.timer);
+      setInviteCode(data.lobby.id);
+      setRivalPins((prev) => prev.map((pin) => pin || generatePin(lobbyPinLength)));
       setStatusTone('success');
       setStatusMessage(`Joined lobby ${code} as ${playerName}. Share the code to invite others.`);
+      navigate('/select-pin');
     } catch (error) {
       setStatusTone('error');
       setStatusMessage(error instanceof Error ? error.message : 'Could not join that lobby.');
@@ -142,11 +157,15 @@ function AppRoutes() {
     setPins((prev) => prev.map((pin, index) => (index === roundIndex ? cleaned : pin)));
   };
 
-  const generatePin = () =>
-    Array.from({ length: pinLength }, () => Math.floor(Math.random() * 10)).join('');
+  const generatePin = (length = pinLength) =>
+    Array.from({ length }, () => Math.floor(Math.random() * 10)).join('');
 
   const handleAutoGenerate = () => {
     setPins(Array.from({ length: 3 }, generatePin));
+  };
+
+  const ensureRivalPins = () => {
+    setRivalPins((prev) => prev.map((pin) => (pin && pin.length === pinLength ? pin : generatePin())));
   };
 
   const handleGuessDigitChange = (index: number, value: string) => {
@@ -154,7 +173,7 @@ function AppRoutes() {
     setGuessDigits((prev) => prev.map((existing, idx) => (idx === index ? digit : existing)));
   };
 
-  const currentSecret = pins[activeRound - 1];
+  const currentSecret = rivalPins[activeRound - 1];
 
   const handleSubmitGuess = () => {
     const guess = guessDigits.join('');
@@ -167,7 +186,7 @@ function AppRoutes() {
 
     if (!currentSecret || currentSecret.length !== pinLength) {
       setPlayTone('error');
-      setPlayStatus('Set your secret pin for this round to compare guesses.');
+      setPlayStatus('Waiting on your rival to lock in their pin for this round.');
       return;
     }
 
@@ -278,7 +297,10 @@ function AppRoutes() {
                   inviteCode={inviteCode}
                   onPinChange={handlePinChange}
                   onAutoGenerate={handleAutoGenerate}
-                  onContinue={() => navigate('/play')}
+                  onContinue={() => {
+                    ensureRivalPins();
+                    navigate('/play');
+                  }}
                 />
               </div>
             }
@@ -297,6 +319,7 @@ function AppRoutes() {
                 <RoundPreview
                   playerName={playerName}
                   pins={pins}
+                  rivalPins={rivalPins}
                   pinLength={pinLength}
                   activeRound={activeRound}
                   guessDigits={guessDigits}
