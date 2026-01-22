@@ -122,6 +122,20 @@ export const useGameLogic = (config: GameConfig) => {
         setIsRoundActive(true);
     }, [config.pinLength, config.timerDuration, config.mode, generatePin]);
 
+    const endRound = useCallback((winner: 'player' | 'opponent' | 'draw', reason: 'guessed' | 'timeout' | 'surrender') => {
+        setIsRoundActive(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        if (opponentTimerRef.current) clearInterval(opponentTimerRef.current);
+
+        setRoundResult({ winner, reason, score: 0 }); // Score is tracked globally
+
+        if (config.mode === 'single') {
+            if (winner === 'player') setPlayerScore(s => s + 1);
+            if (winner === 'opponent') setOpponentScore(s => s + 1);
+        }
+        // In multiplayer, score comes from server or we update it based on events
+    }, [config.mode]);
+
     const submitGuess = useCallback((guessOverride?: string[]) => {
         const guessToSubmit = guessOverride || currentGuess;
 
@@ -160,21 +174,7 @@ export const useGameLogic = (config: GameConfig) => {
         if (feedback.every(f => f === 'correct')) {
             endRound('player', 'guessed');
         }
-    }, [isRoundActive, currentGuess, secretPin, calculateFeedback, config.pinLength, config.mode, config.roomId, config.playerId]);
-
-    const endRound = useCallback((winner: 'player' | 'opponent' | 'draw', reason: 'guessed' | 'timeout' | 'surrender') => {
-        setIsRoundActive(false);
-        if (timerRef.current) clearInterval(timerRef.current);
-        if (opponentTimerRef.current) clearInterval(opponentTimerRef.current);
-
-        setRoundResult({ winner, reason, score: 0 }); // Score is tracked globally
-
-        if (config.mode === 'single') {
-            if (winner === 'player') setPlayerScore(s => s + 1);
-            if (winner === 'opponent') setOpponentScore(s => s + 1);
-        }
-        // In multiplayer, score comes from server or we update it based on events
-    }, [config.mode]);
+    }, [isRoundActive, currentGuess, secretPin, calculateFeedback, config.pinLength, config.mode, config.roomId, config.playerId, endRound, currentRound]);
 
     const nextRound = useCallback(() => {
         setRoundResult(null); // Clear modal when user acknowledges
@@ -340,6 +340,7 @@ export const useGameLogic = (config: GameConfig) => {
     useEffect(() => {
         if (pendingRoundStart !== null && roundResult === null) {
             console.log("Auto-consuming pending round start:", pendingRoundStart);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             startRound(pendingRoundStart);
             setPendingRoundStart(null);
         }
@@ -349,6 +350,7 @@ export const useGameLogic = (config: GameConfig) => {
     useEffect(() => {
         if (timeLeft === 0 && isRoundActive) {
             if (config.mode === 'single') {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 endRound('opponent', 'timeout');
             } else {
                 // In MP, server handles timeout. We just wait for round_end msg.
@@ -362,10 +364,11 @@ export const useGameLogic = (config: GameConfig) => {
     useEffect(() => {
         if (config.mode === 'multiplayer' && config.initialState) {
             console.log("Syncing with initial state:", config.initialState);
-            const { current_round, scores, round_start_time } = config.initialState;
+            const { current_round, scores, round_start_time, ready_players } = config.initialState;
 
             // Sync Round
             if (current_round) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setCurrentRound(current_round);
             }
 
@@ -403,8 +406,19 @@ export const useGameLogic = (config: GameConfig) => {
                 }
             } else {
                 // No start time (maybe round 1 just started without time yet? or simple sync)
-                setTimeLeft(config.timerDuration);
-                setIsRoundActive(true);
+                // If we are in multiplayer and have no start time, we are likely waiting.
+                setIsRoundActive(false);
+                setTimeLeft(config.timerDuration); // Reset timer visual
+
+                // Check if we need to ready up (reconnected in waiting state)
+                if (config.roomId && config.playerId && ready_players && !ready_players.includes(config.playerId)) {
+                    console.log("Reconnected and not ready. Sending player_ready.");
+                    socketService.sendMessage({
+                        type: 'player_ready',
+                        room_id: config.roomId,
+                        player_id: config.playerId
+                    });
+                }
             }
 
         } else {
