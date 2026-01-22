@@ -79,6 +79,8 @@ definitions:
         items:
           type: string
         type: array
+      round_start_time:
+        type: string
       scores:
         additionalProperties:
           type: integer

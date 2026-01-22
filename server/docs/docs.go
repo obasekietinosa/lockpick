@@ -309,6 +309,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "round_start_time": {
+                    "type": "string"
+                },
                 "scores": {
                     "description": "PlayerID -\u003e Score (Rounds won)",
                     "type": "object",
