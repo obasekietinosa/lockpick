@@ -313,8 +313,16 @@ func (s *Server) HandleSelectPin(w http.ResponseWriter, r *http.Request) {
 		if len(roomPlayers) == 2 {
 			allReady := true
 			for _, pid := range roomPlayers {
-				p, err := s.store.GetPlayer(r.Context(), pid)
-				if err != nil || len(p.Pins) != 3 {
+				var p *store.Player
+				var err error
+
+				if pid == playerID {
+					p = player
+				} else {
+					p, err = s.store.GetPlayer(r.Context(), pid)
+				}
+
+				if err != nil || p == nil || len(p.Pins) != 3 {
 					allReady = false
 					break
 				}
