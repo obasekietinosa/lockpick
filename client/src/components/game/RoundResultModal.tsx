@@ -42,7 +42,8 @@ export const RoundResultModal = ({ result, onNextRound, currentRound, maxRounds 
 
                 <p className="text-slate-400 mb-8">
                     {result.reason === 'guessed' && isWin && "You guessed the pin!"}
-                    {result.reason === 'guessed' && !isWin && "Opponent guessed your pin!"}
+                    {result.reason === 'guessed' && !isWin && !isDraw && "Opponent guessed your pin!"}
+                    {result.reason === 'guessed' && isDraw && "Round Draw!"}
                     {result.reason === 'timeout' && "Time ran out!"}
                 </p>
 

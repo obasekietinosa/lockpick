@@ -10,6 +10,7 @@ import { PinDisplay } from "../components/game/PinDisplay";
 import { RoundResultModal } from "../components/game/RoundResultModal";
 import { GameResultModal } from "../components/game/GameResultModal";
 import { Icon } from "@iconify/react";
+import { socketService } from "../services/socket";
 
 export const GamePage = () => {
     const navigate = useNavigate();
@@ -217,6 +218,21 @@ export const GamePage = () => {
                     <div className="flex flex-col items-center gap-4 p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl">
                         <Icon icon="mdi:loading" width="48" className="animate-spin text-cyan-400" />
                         <p className="text-lg text-slate-300 font-medium tracking-wide">Waiting for opponent...</p>
+
+                        <button
+                            onClick={() => {
+                                if (config.roomId && config.playerId) {
+                                    socketService.sendMessage({
+                                        type: 'player_ready',
+                                        room_id: config.roomId,
+                                        player_id: config.playerId
+                                    });
+                                }
+                            }}
+                            className="mt-4 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-sm text-slate-300 rounded-lg transition-colors border border-slate-600 hover:border-slate-500"
+                        >
+                            Stuck? Click here to ready up
+                        </button>
                     </div>
                 </div>
             )}
