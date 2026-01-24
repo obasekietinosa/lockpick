@@ -10,6 +10,7 @@ export const JoinGamePage = () => {
     const [name, setName] = useState("");
     const [gameId, setGameId] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Auto-fill from URL
     useEffect(() => {
@@ -21,8 +22,9 @@ export const JoinGamePage = () => {
 
     const handleJoin = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        setError(null);
         setIsLoading(true);
+
         try {
             console.log("Joining game:", { name, gameId });
             // Clean up game ID in case they pasted a full URL
@@ -41,8 +43,7 @@ export const JoinGamePage = () => {
             navigate("/select-pin", { state: { ...response, mode: "multiplayer" } });
         } catch (error) {
             console.error("Failed to join game:", error);
-            // TODO: Better error handling
-            alert("Failed to join game. Please check the Game ID and try again.");
+            setError("Failed to join game. Please check the Game ID and try again.");
         } finally {
             setIsLoading(false);
         }
@@ -69,6 +70,13 @@ export const JoinGamePage = () => {
                 </div>
 
                 <form onSubmit={handleJoin} className="bg-slate-800/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-slate-700 space-y-6">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/50 text-red-200 p-4 rounded-lg flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                            <Icon icon="mdi:alert-circle" width="24" className="text-red-500 shrink-0" />
+                            <p className="text-sm font-medium">{error}</p>
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-slate-300">Player Name</label>
                         <div className="relative">
@@ -78,7 +86,10 @@ export const JoinGamePage = () => {
                             <input
                                 type="text"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => {
+                                    setName(e.target.value);
+                                    setError(null);
+                                }}
                                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none text-white transition-all placeholder:text-slate-600"
                                 placeholder="Enter your name"
                                 required
@@ -96,7 +107,10 @@ export const JoinGamePage = () => {
                             <input
                                 type="text"
                                 value={gameId}
-                                onChange={(e) => setGameId(e.target.value)}
+                                onChange={(e) => {
+                                    setGameId(e.target.value);
+                                    setError(null);
+                                }}
                                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-900/50 border border-slate-600 focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:outline-none text-white transition-all placeholder:text-slate-600"
                                 placeholder="Paste game link or ID"
                                 required
